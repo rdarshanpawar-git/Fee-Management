@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Billing System | Vivekananda Vidya Mandir</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #printable-bill, #printable-bill * { visibility: visible; }
+            #printable-bill { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <nav class="bg-blue-900 text-white p-4 shadow-md no-print flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-bold">Vivekananda Vidya Mandir</h1>
+            <h2 class="text-sm text-blue-200">By, Arya International</h2>
+        </div>
+        <div class="space-x-4">
+            <button onclick="switchTab('billing')" class="hover:text-yellow-400 font-medium">Billing</button>
+            <button onclick="switchTab('settings')" class="hover:text-yellow-400 font-medium">Fee Settings</button>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6 no-print" id="app-container">
+        
+        <div id="billing-tab" class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold mb-6 border-b pb-2">Student Billing</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Student ID / Roll No</label>
+                    <input type="text" id="studentId" onblur="loadStudent()" class="mt-1 w-full p-2 border rounded-md" placeholder="Enter ID to auto-load">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Student Name</label>
+                    <input type="text" id="studentName" class="mt-1 w-full p-2 border rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Class / Grade</label>
+                    <select id="studentClass" onchange="loadClassFees()" class="mt-1 w-full p-2 border rounded-md">
+                        <option value="">Select Class</option>
+                        <option value="Grade 1">Grade 1</option>
+                        <option value="Grade 2">Grade 2</option>
+                        <option value="Grade 3">Grade 3</option>
+                        <option value="Grade 4">Grade 4</option>
+                        <option value="Grade 5">Grade 5</option>
+                        <option value="Grade 6">Grade 6</option>
+                        <option value="Grade 7">Grade 7</option>
+                        <option value="Grade 8">Grade 8</option>
+                        <option value="Grade 9">Grade 9</option>
+                        <option value="Grade 10">Grade 10</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Payment Mode</label>
+                    <select id="paymentMode" class="mt-1 w-full p-2 border rounded-md">
+                        <option value="Cash">Cash</option>
+                        <option value="Card">Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-4 rounded-md mb-6 border">
+                <h3 class="font-semibold mb-4 text-gray-800">Fee Details & Payment</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-500">Standard Total Fee</label>
+                        <input type="number" id="standardFee" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500">Concession Amount (₹)</label>
+                        <input type="number" id="concession" value="0" oninput="calculateTotals()" class="mt-1 w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500">Net Fee (After Concession)</label>
+                        <input type="number" id="netFee" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md font-bold text-blue-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500">Previously Paid</label>
+                        <input type="number" id="prevPaid" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md text-green-700 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500">Current Payment (₹)</label>
+                        <input type="number" id="currentPayment" value="0" oninput="calculateTotals()" class="mt-1 w-full p-2 border rounded-md bg-yellow-50">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500">Remaining Balance</label>
+                        <input type="number" id="balance" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md font-bold text-red-600">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="processPaymentAndPrint()" class="bg-blue-600 text-white px-6 py-2 rounded shadow hover:bg-blue-700 transition">Save Payment & Print Bill</button>
+        </div>
+
+        <div id="settings-tab" class="bg-white p-6 rounded-lg shadow-lg hidden">
+            <h2 class="text-2xl font-semibold mb-6 border-b pb-2">Class Fee Configurations</h2>
+            <div id="fee-settings-container" class="space-y-4"></div>
+            <button onclick="saveFeeSettings()" class="mt-6 bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700">Save Standard Fees</button>
+        </div>
+    </div>
+
+    <div id="printable-bill" class="bg-white p-8 hidden max-w-4xl mx-auto">
+        <div class="flex items-center justify-between border-b-4 border-blue-900 pb-4 mb-6">
+            <div class="flex items-center gap-4">
+                <img src="logo.png" alt="School Logo" class="h-24 w-24 object-contain">
+                <div>
+                    <h1 class="text-3xl font-bold text-blue-900 uppercase">Vivekananda Vidya Mandir</h1>
+                    <h2 class="text-lg font-semibold text-gray-700">By, Arya International</h2>
+                    <p class="text-sm text-gray-500">Imparting Quality Education</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <h3 class="text-2xl font-bold text-gray-300 uppercase tracking-widest">Invoice</h3>
+                <p class="text-sm font-semibold mt-2">Date: <span id="printDate"></span></p>
+            </div>
+        </div>
+
+        <div class="flex justify-between mb-8">
+            <div>
+                <p class="text-sm text-gray-500">Billed To:</p>
+                <p class="font-bold text-lg" id="printStudentName"></p>
+                <p>ID/Roll: <span id="printStudentId" class="font-semibold"></span></p>
+                <p>Class: <span id="printStudentClass" class="font-semibold"></span></p>
+            </div>
+            <div class="text-right">
+                <p>Payment Mode: <span id="printMode" class="font-semibold"></span></p>
+            </div>
+        </div>
+
+        <table class="w-full mb-8 border-collapse">
+            <thead>
+                <tr class="bg-blue-900 text-white">
+                    <th class="p-3 text-left border">Description</th>
+                    <th class="p-3 text-right border">Amount (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="printFeeBreakdown">
+                </tbody>
+        </table>
+
+        <div class="flex justify-end">
+            <div class="w-1/2">
+                <div class="flex justify-between border-b py-2">
+                    <span class="font-semibold">Total Standard Fee:</span>
+                    <span id="printStandardFee"></span>
+                </div>
+                <div class="flex justify-between border-b py-2 text-red-600">
+                    <span class="font-semibold">Concession Applied:</span>
+                    <span id="printConcession"></span>
+                </div>
+                <div class="flex justify-between border-b py-2 text-green-700">
+                    <span class="font-semibold">Total Paid (Including Today):</span>
+                    <span id="printTotalPaid"></span>
+                </div>
+                <div class="flex justify-between py-3 text-xl font-bold">
+                    <span>Balance Due:</span>
+                    <span id="printBalance"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-16 flex justify-between text-gray-500 text-sm">
+            <div class="border-t border-gray-400 pt-2 w-48 text-center">Parent/Guardian Signature</div>
+            <div class="border-t border-gray-400 pt-2 w-48 text-center">Authorized Signatory</div>
+        </div>
+    </div>
+
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker Registered'))
+            .catch(err => console.error('Service Worker Registration Failed:', err));
+        }
+
+        // 1. Initial Data Setup
+        const defaultFees = {
+            "Grade 1": { school: 25000, books: 3000, uniform: 2000, transport: 5000 },
+            "Grade 2": { school: 27000, books: 3500, uniform: 2200, transport: 5000 },
+            "Grade 3": { school: 30000, books: 4000, uniform: 2500, transport: 5000 },
+            "Grade 4": { school: 30000, books: 4000, uniform: 2500, transport: 5000 },
+            "Grade 5": { school: 32000, books: 4500, uniform: 2800, transport: 5500 },
+            "Grade 6": { school: 32000, books: 4500, uniform: 2800, transport: 5500 },
+            "Grade 7": { school: 35000, books: 5000, uniform: 3000, transport: 6000 },
+            "Grade 8": { school: 35000, books: 5000, uniform: 3000, transport: 6000 },
+            "Grade 9": { school: 40000, books: 6000, uniform: 3500, transport: 6500 },
+            "Grade 10": { school: 40000, books: 6000, uniform: 3500, transport: 6500 }
+        };
+
+        let classFees = JSON.parse(localStorage.getItem('classFees')) || defaultFees;
+        let studentsData = JSON.parse(localStorage.getItem('studentsData')) || {};
+
+        // 2. UI Navigation
+        function switchTab(tab) {
+            document.getElementById('billing-tab').classList.add('hidden');
+            document.getElementById('settings-tab').classList.add('hidden');
+            document.getElementById(`${tab}-tab`).classList.remove('hidden');
+            if (tab === 'settings') renderSettings();
+        }
+
+        // 3. Settings Management
+        function renderSettings() {
+            const container = document.getElementById('fee-settings-container');
+            container.innerHTML = '';
+            for (let grade in classFees) {
+                let html = `
+                <div class="p-4 border rounded bg-gray-50 flex flex-wrap gap-4 items-end">
+                    <div class="w-24"><label class="text-sm font-bold">${grade}</label></div>
+                    <div class="flex-1"><label class="text-xs">School Fee</label><input type="number" id="sf-${grade}" value="${classFees[grade].school}" class="w-full p-1 border rounded"></div>
+                    <div class="flex-1"><label class="text-xs">Books</label><input type="number" id="bf-${grade}" value="${classFees[grade].books}" class="w-full p-1 border rounded"></div>
+                    <div class="flex-1"><label class="text-xs">Uniform</label><input type="number" id="uf-${grade}" value="${classFees[grade].uniform}" class="w-full p-1 border rounded"></div>
+                    <div class="flex-1"><label class="text-xs">Transport</label><input type="number" id="tf-${grade}" value="${classFees[grade].transport}" class="w-full p-1 border rounded"></div>
+                </div>`;
+                container.innerHTML += html;
+            }
+        }
+
+        function saveFeeSettings() {
+            for (let grade in classFees) {
+                classFees[grade].school = parseFloat(document.getElementById(`sf-${grade}`).value) || 0;
+                classFees[grade].books = parseFloat(document.getElementById(`bf-${grade}`).value) || 0;
+                classFees[grade].uniform = parseFloat(document.getElementById(`uf-${grade}`).value) || 0;
+                classFees[grade].transport = parseFloat(document.getElementById(`tf-${grade}`).value) || 0;
+            }
+            localStorage.setItem('classFees', JSON.stringify(classFees));
+            alert('Fee structures updated successfully!');
+            switchTab('billing');
+        }
+
+        // 4. Billing Logic
+        function loadStudent() {
+            const id = document.getElementById('studentId').value.trim();
+            if (studentsData[id]) {
+                const student = studentsData[id];
+                document.getElementById('studentName').value = student.name;
+                document.getElementById('studentClass').value = student.class;
+                document.getElementById('concession').value = student.concession;
+                document.getElementById('prevPaid').value = student.totalPaid;
+                loadClassFees();
+            } else {
+                document.getElementById('prevPaid').value = 0;
+                document.getElementById('concession').value = 0;
+            }
+        }
+
+        function loadClassFees() {
+            const cls = document.getElementById('studentClass').value;
+            if (!cls || !classFees[cls]) return;
+            
+            const fees = classFees[cls];
+            const total = fees.school + fees.books + fees.uniform + fees.transport;
+            document.getElementById('standardFee').value = total;
+            calculateTotals();
+        }
+
+        function calculateTotals() {
+            const stdFee = parseFloat(document.getElementById('standardFee').value) || 0;
+            const concession = parseFloat(document.getElementById('concession').value) || 0;
+            const prevPaid = parseFloat(document.getElementById('prevPaid').value) || 0;
+            const currentPay = parseFloat(document.getElementById('currentPayment').value) || 0;
+
+            const net = stdFee - concession;
+            const balance = net - (prevPaid + currentPay);
+
+            document.getElementById('netFee').value = net;
+            document.getElementById('balance').value = balance;
+        }
+
+        // 5. Processing and Printing
+        function processPaymentAndPrint() {
+            const id = document.getElementById('studentId').value.trim();
+            if (!id) return alert("Please enter a Student ID");
+
+            const name = document.getElementById('studentName').value;
+            const cls = document.getElementById('studentClass').value;
+            if (!cls) return alert("Please select a class");
+
+            const concession = parseFloat(document.getElementById('concession').value) || 0;
+            const prevPaid = parseFloat(document.getElementById('prevPaid').value) || 0;
+            const currentPay = parseFloat(document.getElementById('currentPayment').value) || 0;
+            
+            const newTotalPaid = prevPaid + currentPay;
+
+            // Save to Local Storage
+            studentsData[id] = { name, class: cls, concession, totalPaid: newTotalPaid };
+            localStorage.setItem('studentsData', JSON.stringify(studentsData));
+
+            // Populate Print View
+            document.getElementById('printDate').innerText = new Date().toLocaleDateString();
+            document.getElementById('printStudentName').innerText = name;
+            document.getElementById('printStudentId').innerText = id;
+            document.getElementById('printStudentClass').innerText = cls;
+            document.getElementById('printMode').innerText = document.getElementById('paymentMode').value;
+
+            // Generate Breakdown Table
+            const fees = classFees[cls];
+            const breakdown = `
+                <tr><td class="p-3 border">School Fee (Full/Term Plan)</td><td class="p-3 border text-right">₹${fees.school.toLocaleString('en-IN')}</td></tr>
+                <tr><td class="p-3 border">Books Fee</td><td class="p-3 border text-right">₹${fees.books.toLocaleString('en-IN')}</td></tr>
+                <tr><td class="p-3 border">Uniform Fee</td><td class="p-3 border text-right">₹${fees.uniform.toLocaleString('en-IN')}</td></tr>
+                <tr><td class="p-3 border">Transportation Fee</td><td class="p-3 border text-right">₹${fees.transport.toLocaleString('en-IN')}</td></tr>
+            `;
+            document.getElementById('printFeeBreakdown').innerHTML = breakdown;
+
+            document.getElementById('printStandardFee').innerText = `₹${parseFloat(document.getElementById('standardFee').value).toLocaleString('en-IN')}`;
+            document.getElementById('printConcession').innerText = `- ₹${concession.toLocaleString('en-IN')}`;
+            document.getElementById('printTotalPaid').innerText = `₹${newTotalPaid.toLocaleString('en-IN')}`;
+            document.getElementById('printBalance').innerText = `₹${parseFloat(document.getElementById('balance').value).toLocaleString('en-IN')}`;
+
+            // Trigger Print
+            document.getElementById('printable-bill').classList.remove('hidden');
+            window.print();
+            
+            // Clean up UI after print dialog closes
+            setTimeout(() => {
+                document.getElementById('printable-bill').classList.add('hidden');
+                document.getElementById('prevPaid').value = newTotalPaid;
+                document.getElementById('currentPayment').value = 0;
+                calculateTotals();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
