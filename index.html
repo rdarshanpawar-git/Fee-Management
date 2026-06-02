@@ -10,11 +10,20 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* CSS to make the header background-color print as solid blue */
         @media print {
             body * { visibility: hidden; }
             #printable-bill, #printable-bill * { visibility: visible; }
-            #printable-bill { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+            #printable-bill { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                padding: 0;
+            }
             .no-print { display: none !important; }
+            /* This property forces backgrounds to print for a professional receipt look */
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
@@ -112,60 +121,70 @@
         </div>
     </div>
 
-    <div id="printable-bill" class="bg-white p-8 hidden max-w-4xl mx-auto">
-        <div class="flex items-center justify-between border-b-4 border-blue-900 pb-4 mb-6">
-            <div class="flex items-center gap-4">
-                <img src="logo.png" alt="School Logo" class="h-24 w-24 object-contain">
-                <div>
-                    <h1 class="text-3xl font-bold text-blue-900 uppercase">Vivekananda Vidya Mandir</h1>
-                    <h2 class="text-lg font-semibold text-gray-700">By, Arya International</h2>
-                    <p class="text-sm text-gray-500">Imparting Quality Education</p>
-                </div>
+    <div id="printable-bill" class="bg-white p-8 hidden max-w-4xl mx-auto border border-gray-200">
+        
+        <div class="flex items-start gap-6 border-b-2 border-blue-900 pb-4 mb-6">
+            <div class="w-1/4 flex flex-col items-center gap-2">
+                <img src="logo.png" alt="School Logo" class="h-32 w-32 object-contain">
+                <p class="text-xs text-center italic text-blue-900 font-medium">Imparting Quality Education</p>
             </div>
-            <div class="text-right">
-                <h3 class="text-2xl font-bold text-gray-300 uppercase tracking-widest">Invoice</h3>
-                <p class="text-sm font-semibold mt-2">Date: <span id="printDate"></span></p>
+            
+            <div class="w-3/4 text-right flex flex-col gap-1">
+                <h1 class="text-4xl font-extrabold text-blue-900 leading-tight">VIVEKANANDA VIDYA MANDIR</h1>
+                <h2 class="text-2xl font-bold text-blue-900 mt-1">By, Arya International</h2>
+                <div class="text-sm font-medium text-blue-900 space-y-1">
+                    <p class="font-bold">IMPARTING QUALITY EDUCATION</p>
+                    <p>AFFILIATED TO GOVT. OF TAMIL NADU</p>
+                    <p>S R Nagar, Jawalagiri Road, Thally 635 118</p>
+                    <p>Ph: +91 9442852500, +91 9489734255</p>
+                    <p>Email: <a href="mailto:admissions@vvmaryainternational.org" class="underline text-blue-800">admissions@vvmaryainternational.org</a></p>
+                </div>
             </div>
         </div>
 
-        <div class="flex justify-between mb-8">
+        <div class="bg-blue-900 text-white text-center text-lg font-bold p-3 mb-6 uppercase tracking-wider">
+            Fee Receipt
+        </div>
+
+        <div class="flex justify-between mb-8 text-blue-950 font-medium">
             <div>
-                <p class="text-sm text-gray-500">Billed To:</p>
+                <p class="text-sm text-gray-600">Billed To:</p>
                 <p class="font-bold text-lg" id="printStudentName"></p>
                 <p>ID/Roll: <span id="printStudentId" class="font-semibold"></span></p>
                 <p>Class: <span id="printStudentClass" class="font-semibold"></span></p>
             </div>
             <div class="text-right">
-                <p>Payment Mode: <span id="printMode" class="font-semibold"></span></p>
+                <p>Date: <span id="printDate" class="font-semibold"></span></p>
+                <p>Payment Mode: <span id="printMode" class="font-semibold uppercase tracking-wide"></span></p>
             </div>
         </div>
 
-        <table class="w-full mb-8 border-collapse">
+        <table class="w-full mb-8 border-collapse border border-blue-900">
             <thead>
-                <tr class="bg-blue-900 text-white">
-                    <th class="p-3 text-left border">Description</th>
-                    <th class="p-3 text-right border">Amount (₹)</th>
+                <tr class="bg-blue-900 text-white font-bold uppercase tracking-wide">
+                    <th class="p-3 text-left border border-blue-900">Description</th>
+                    <th class="p-3 text-right border border-blue-900">Amount (₹)</th>
                 </tr>
             </thead>
-            <tbody id="printFeeBreakdown">
+            <tbody id="printFeeBreakdown" class="font-medium text-blue-950">
                 </tbody>
         </table>
 
-        <div class="flex justify-end">
+        <div class="flex justify-end text-blue-950">
             <div class="w-1/2">
-                <div class="flex justify-between border-b py-2">
+                <div class="flex justify-between border-b border-gray-300 py-2">
                     <span class="font-semibold">Total Standard Fee:</span>
                     <span id="printStandardFee"></span>
                 </div>
-                <div class="flex justify-between border-b py-2 text-red-600">
+                <div class="flex justify-between border-b border-gray-300 py-2 text-red-600">
                     <span class="font-semibold">Concession Applied:</span>
                     <span id="printConcession"></span>
                 </div>
-                <div class="flex justify-between border-b py-2 text-green-700">
+                <div class="flex justify-between border-b border-gray-300 py-2 text-green-700">
                     <span class="font-semibold">Total Paid (Including Today):</span>
                     <span id="printTotalPaid"></span>
                 </div>
-                <div class="flex justify-between py-3 text-xl font-bold">
+                <div class="flex justify-between py-3 text-2xl font-extrabold text-blue-950 border-t-2 border-blue-900 mt-1">
                     <span>Balance Due:</span>
                     <span id="printBalance"></span>
                 </div>
@@ -173,8 +192,8 @@
         </div>
         
         <div class="mt-16 flex justify-between text-gray-500 text-sm">
-            <div class="border-t border-gray-400 pt-2 w-48 text-center">Parent/Guardian Signature</div>
-            <div class="border-t border-gray-400 pt-2 w-48 text-center">Authorized Signatory</div>
+            <div class="border-t border-gray-400 pt-2 w-48 text-center font-medium">Parent/Guardian Signature</div>
+            <div class="border-t border-gray-400 pt-2 w-48 text-center font-medium">Authorized Signatory</div>
         </div>
     </div>
 
@@ -299,7 +318,7 @@
             localStorage.setItem('studentsData', JSON.stringify(studentsData));
 
             // Populate Print View
-            document.getElementById('printDate').innerText = new Date().toLocaleDateString();
+            document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-IN');
             document.getElementById('printStudentName').innerText = name;
             document.getElementById('printStudentId').innerText = id;
             document.getElementById('printStudentClass').innerText = cls;
@@ -308,10 +327,10 @@
             // Generate Breakdown Table
             const fees = classFees[cls];
             const breakdown = `
-                <tr><td class="p-3 border">School Fee (Full/Term Plan)</td><td class="p-3 border text-right">₹${fees.school.toLocaleString('en-IN')}</td></tr>
-                <tr><td class="p-3 border">Books Fee</td><td class="p-3 border text-right">₹${fees.books.toLocaleString('en-IN')}</td></tr>
-                <tr><td class="p-3 border">Uniform Fee</td><td class="p-3 border text-right">₹${fees.uniform.toLocaleString('en-IN')}</td></tr>
-                <tr><td class="p-3 border">Transportation Fee</td><td class="p-3 border text-right">₹${fees.transport.toLocaleString('en-IN')}</td></tr>
+                <tr><td class="p-3 border border-gray-300">School Fee (Full/Term Plan)</td><td class="p-3 border border-gray-300 text-right">₹${fees.school.toLocaleString('en-IN')}</td></tr>
+                <tr><td class="p-3 border border-gray-300">Books Fee</td><td class="p-3 border border-gray-300 text-right">₹${fees.books.toLocaleString('en-IN')}</td></tr>
+                <tr><td class="p-3 border border-gray-300">Uniform Fee</td><td class="p-3 border border-gray-300 text-right">₹${fees.uniform.toLocaleString('en-IN')}</td></tr>
+                <tr><td class="p-3 border border-gray-300">Transportation Fee</td><td class="p-3 border border-gray-300 text-right">₹${fees.transport.toLocaleString('en-IN')}</td></tr>
             `;
             document.getElementById('printFeeBreakdown').innerHTML = breakdown;
 
@@ -322,15 +341,19 @@
 
             // Trigger Print
             document.getElementById('printable-bill').classList.remove('hidden');
-            window.print();
             
-            // Clean up UI after print dialog closes
+            // Short delay to ensure browser renders the text content before printing
             setTimeout(() => {
-                document.getElementById('printable-bill').classList.add('hidden');
-                document.getElementById('prevPaid').value = newTotalPaid;
-                document.getElementById('currentPayment').value = 0;
-                calculateTotals();
-            }, 1000);
+                window.print();
+                
+                // Clean up UI after print dialog closes
+                setTimeout(() => {
+                    document.getElementById('printable-bill').classList.add('hidden');
+                    document.getElementById('prevPaid').value = newTotalPaid;
+                    document.getElementById('currentPayment').value = 0;
+                    calculateTotals();
+                }, 1000);
+            }, 50);
         }
     </script>
 </body>
