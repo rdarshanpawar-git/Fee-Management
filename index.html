@@ -10,10 +10,15 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* CSS to enforce strictly Black & White, single-page printing */
+        /* CSS to enforce Times New Roman, Light Theme, and remove browser URLs */
         @media print {
+            @page { margin: 0.5cm; } /* Removes default browser headers/footers (URLs and Titles) */
             body * { visibility: hidden; }
-            #printable-bill, #printable-bill * { visibility: visible; color: black !important; border-color: black !important; }
+            #printable-bill, #printable-bill * { 
+                visibility: visible; 
+                color: black !important; 
+                font-family: 'Times New Roman', Times, serif !important;
+            }
             #printable-bill { 
                 position: absolute; 
                 left: 0; 
@@ -22,196 +27,243 @@
                 padding: 10px;
             }
             .no-print { display: none !important; }
-            /* This property forces the black header background to print */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
 
-    <nav class="bg-blue-900 text-white p-4 shadow-md no-print flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div>
-            <h1 class="text-xl font-bold">Vivekananda Vidya Mandir</h1>
-            <h2 class="text-sm text-blue-200">By, Arya International</h2>
-        </div>
-        <div class="space-x-4 flex items-center">
-            <button onclick="switchTab('dashboard')" class="hover:text-yellow-400 font-medium transition-colors">Dashboard & Reports</button>
-            <button onclick="switchTab('billing')" class="hover:text-yellow-400 font-medium border-l border-blue-700 pl-4 transition-colors">Student Billing</button>
-            <button onclick="switchTab('settings')" class="hover:text-yellow-400 font-medium border-l border-blue-700 pl-4 transition-colors">Fee Settings</button>
-        </div>
-    </nav>
-
-    <div class="container mx-auto p-6 no-print" id="app-container">
-        
-        <div id="dashboard-tab" class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-900">Consolidated Financial Overview</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-gray-50 border-l-4 border-blue-500 p-4 rounded shadow-sm">
-                    <p class="text-sm text-gray-500 font-semibold uppercase">Total Expected</p>
-                    <p class="text-2xl font-bold text-gray-800" id="dashTotalExpected">₹0</p>
-                </div>
-                <div class="bg-gray-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
-                    <p class="text-sm text-gray-500 font-semibold uppercase">Total Concessions</p>
-                    <p class="text-2xl font-bold text-red-600" id="dashTotalConcession">₹0</p>
-                </div>
-                <div class="bg-gray-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
-                    <p class="text-sm text-gray-500 font-semibold uppercase">Total Collected</p>
-                    <p class="text-2xl font-bold text-green-700" id="dashTotalPaid">₹0</p>
-                </div>
-                <div class="bg-gray-50 border-l-4 border-yellow-500 p-4 rounded shadow-sm">
-                    <p class="text-sm text-gray-500 font-semibold uppercase">Total Pending Balance</p>
-                    <p class="text-2xl font-bold text-yellow-700" id="dashTotalBalance">₹0</p>
-                </div>
+    <div id="login-screen" class="min-h-screen flex items-center justify-center bg-blue-900">
+        <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
+            <div class="text-center mb-8">
+                <img src="logo.png" alt="Logo" class="h-20 mx-auto mb-4" onerror="this.style.display='none'">
+                <h1 class="text-2xl font-bold text-blue-900">Vivekananda Vidya Mandir</h1>
+                <p class="text-gray-500 text-sm mt-1">Billing System Login</p>
             </div>
-
-            <h3 class="text-xl font-semibold mb-4 text-gray-800 flex justify-between items-end">
-                Class-wise Balance Sheet
-            </h3>
-            <div class="overflow-x-auto mb-8 border rounded-lg shadow-sm">
-                <table class="w-full text-left border-collapse min-w-max">
-                    <thead>
-                        <tr class="bg-blue-900 text-white text-sm uppercase tracking-wide">
-                            <th class="p-3 border-b">Class / Grade</th>
-                            <th class="p-3 border-b text-center">Students</th>
-                            <th class="p-3 border-b text-right">Expected (₹)</th>
-                            <th class="p-3 border-b text-right">Concessions (₹)</th>
-                            <th class="p-3 border-b text-right">Collected (₹)</th>
-                            <th class="p-3 border-b text-right">Pending Balance (₹)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="classReportBody" class="text-gray-700">
-                        </tbody>
-                </table>
-            </div>
-
-            <h3 class="text-xl font-semibold mb-4 text-gray-800">Detailed Student Ledger</h3>
-            <div class="overflow-x-auto border rounded-lg shadow-sm">
-                <table class="w-full text-left border-collapse min-w-max">
-                    <thead>
-                        <tr class="bg-gray-200 text-gray-700 text-sm uppercase tracking-wide">
-                            <th class="p-3 border-b">ID / Roll</th>
-                            <th class="p-3 border-b">Name</th>
-                            <th class="p-3 border-b">Class</th>
-                            <th class="p-3 border-b text-right">Standard Fee (₹)</th>
-                            <th class="p-3 border-b text-right">Concession (₹)</th>
-                            <th class="p-3 border-b text-right">Paid (₹)</th>
-                            <th class="p-3 border-b text-right">Balance Due (₹)</th>
-                            <th class="p-3 border-b text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentReportBody" class="text-gray-700 bg-white">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="billing-tab" class="bg-white p-6 rounded-lg shadow-lg hidden">
-            <h2 class="text-2xl font-semibold mb-6 border-b pb-2">Student Billing</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Student ID / Roll No</label>
-                    <input type="text" id="studentId" onblur="loadStudent()" class="mt-1 w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="Enter ID to auto-load">
+                    <label class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" class="mt-1 w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Student Name</label>
-                    <input type="text" id="studentName" class="mt-1 w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" class="mt-1 w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500" onkeyup="if(event.key === 'Enter') handleLogin()">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Class / Grade</label>
-                    <select id="studentClass" onchange="loadClassFees()" class="mt-1 w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Select Class</option>
-                        <option value="Pre-KG">Pre-KG</option>
-                        <option value="LKG">LKG</option>
-                        <option value="UKG">UKG</option>
-                        <option value="Grade 1">Grade 1</option>
-                        <option value="Grade 2">Grade 2</option>
-                        <option value="Grade 3">Grade 3</option>
-                        <option value="Grade 4">Grade 4</option>
-                        <option value="Grade 5">Grade 5</option>
-                        <option value="Grade 6">Grade 6</option>
-                        <option value="Grade 7">Grade 7</option>
-                        <option value="Grade 8">Grade 8</option>
-                        <option value="Grade 9">Grade 9</option>
-                        <option value="Grade 10">Grade 10</option>
-                        <option value="Grade 11">Grade 11</option>
-                        <option value="Grade 12">Grade 12</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Payment Mode</label>
-                    <select id="paymentMode" class="mt-1 w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                        <option value="Cash">Cash</option>
-                        <option value="Card">Card</option>
-                        <option value="UPI">UPI</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Cheque">Cheque</option>
-                    </select>
-                </div>
+                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-3 rounded-md font-bold hover:bg-blue-700 transition mt-4">Login</button>
             </div>
-
-            <div class="bg-gray-50 p-4 rounded-md mb-6 border">
-                <h3 class="font-semibold mb-4 text-gray-800">Fee Details & Payment</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-xs text-gray-500">Standard Total Fee</label>
-                        <input type="number" id="standardFee" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md font-bold text-gray-700 cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-500">Concession Amount (₹)</label>
-                        <input type="number" id="concession" value="0" oninput="calculateTotals()" class="mt-1 w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-500">Net Fee (After Concession)</label>
-                        <input type="number" id="netFee" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md font-bold text-blue-700 cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-500">Previously Paid</label>
-                        <input type="number" id="prevPaid" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md text-green-700 font-bold cursor-not-allowed">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-500">Current Payment (₹)</label>
-                        <input type="number" id="currentPayment" value="0" oninput="calculateTotals()" class="mt-1 w-full p-2 border border-yellow-400 rounded-md bg-yellow-50 focus:ring-yellow-500 focus:border-yellow-500 font-semibold">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-500">Remaining Balance</label>
-                        <input type="number" id="balance" readonly class="mt-1 w-full p-2 bg-gray-200 border rounded-md font-bold text-red-600 cursor-not-allowed">
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="processPaymentAndPrint()" class="bg-blue-600 text-white px-6 py-3 rounded shadow hover:bg-blue-700 transition font-medium w-full md:w-auto">Save Payment & Print Receipt</button>
-        </div>
-
-        <div id="settings-tab" class="bg-white p-6 rounded-lg shadow-lg hidden">
-            <h2 class="text-2xl font-semibold mb-6 border-b pb-2">Class Fee Configurations</h2>
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded text-sm text-blue-800">
-                Update the standard fees for each class here. These values will be used to automatically calculate totals on the billing page.
-            </div>
-            <div id="fee-settings-container" class="space-y-4"></div>
-            <button onclick="saveFeeSettings()" class="mt-6 bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700 font-medium transition">Save Standard Fees</button>
         </div>
     </div>
 
-    <div id="printable-bill" class="bg-white p-6 hidden max-w-3xl mx-auto border border-black font-sans text-black">
+    <div id="main-app" class="hidden">
+        <nav class="bg-blue-900 text-white p-4 shadow-md no-print flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-xl font-bold">Vivekananda Vidya Mandir</h1>
+                <h2 class="text-sm text-blue-200">By, Arya International</h2>
+            </div>
+            <div class="space-x-4 flex items-center">
+                <button onclick="switchTab('dashboard')" class="hover:text-yellow-400 font-medium transition-colors">Dashboard</button>
+                <button onclick="switchTab('billing')" class="hover:text-yellow-400 font-medium border-l border-blue-700 pl-4 transition-colors">Billing</button>
+                <button onclick="switchTab('settings')" class="hover:text-yellow-400 font-medium border-l border-blue-700 pl-4 transition-colors">Fee Settings</button>
+                <button onclick="handleLogout()" class="hover:text-red-400 font-medium border-l border-blue-700 pl-4 transition-colors text-sm">Logout</button>
+            </div>
+        </nav>
+
+        <div class="container mx-auto p-6 no-print" id="app-container">
+            
+            <div id="dashboard-tab" class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2 text-blue-900">Consolidated Financial Overview</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-gray-50 border-l-4 border-blue-500 p-4 rounded shadow-sm">
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Total Expected</p>
+                        <p class="text-2xl font-bold text-gray-800" id="dashTotalExpected">₹0</p>
+                    </div>
+                    <div class="bg-gray-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Total Concessions</p>
+                        <p class="text-2xl font-bold text-red-600" id="dashTotalConcession">₹0</p>
+                    </div>
+                    <div class="bg-gray-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Total Collected</p>
+                        <p class="text-2xl font-bold text-green-700" id="dashTotalPaid">₹0</p>
+                    </div>
+                    <div class="bg-gray-50 border-l-4 border-yellow-500 p-4 rounded shadow-sm">
+                        <p class="text-sm text-gray-500 font-semibold uppercase">Total Pending Balance</p>
+                        <p class="text-2xl font-bold text-yellow-700" id="dashTotalBalance">₹0</p>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Class-wise Balance Sheet</h3>
+                <div class="overflow-x-auto mb-8 border rounded-lg shadow-sm">
+                    <table class="w-full text-left border-collapse min-w-max">
+                        <thead>
+                            <tr class="bg-blue-900 text-white text-sm uppercase tracking-wide">
+                                <th class="p-3 border-b">Class</th>
+                                <th class="p-3 border-b text-center">Students</th>
+                                <th class="p-3 border-b text-right">Expected</th>
+                                <th class="p-3 border-b text-right">Concessions</th>
+                                <th class="p-3 border-b text-right">Collected</th>
+                                <th class="p-3 border-b text-right">Pending</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classReportBody" class="text-gray-700"></tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Detailed Student Ledger</h3>
+                <div class="overflow-x-auto border rounded-lg shadow-sm">
+                    <table class="w-full text-left border-collapse min-w-max text-sm">
+                        <thead>
+                            <tr class="bg-gray-200 text-gray-700 uppercase tracking-wide">
+                                <th class="p-3 border-b">ID</th>
+                                <th class="p-3 border-b">Name</th>
+                                <th class="p-3 border-b">Class</th>
+                                <th class="p-3 border-b text-right">Fee</th>
+                                <th class="p-3 border-b text-right">Concession</th>
+                                <th class="p-3 border-b text-right">Paid</th>
+                                <th class="p-3 border-b text-right">Balance Due</th>
+                                <th class="p-3 border-b text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentReportBody" class="text-gray-700 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="billing-tab" class="bg-white p-6 rounded-lg shadow-lg hidden">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2">Student Billing Details</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Student ID / Roll No</label>
+                        <input type="text" id="studentId" onblur="loadStudent()" class="mt-1 w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500 bg-blue-50" placeholder="Enter ID & Press Tab">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Student Name</label>
+                        <input type="text" id="studentName" class="mt-1 w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Class / Grade</label>
+                        <select id="studentClass" onchange="loadClassFees()" class="mt-1 w-full p-2 border rounded-md">
+                            <option value="">Select Class</option>
+                            <option value="Pre-KG">Pre-KG</option>
+                            <option value="LKG">LKG</option>
+                            <option value="UKG">UKG</option>
+                            <option value="Grade 1">Grade 1</option><option value="Grade 2">Grade 2</option>
+                            <option value="Grade 3">Grade 3</option><option value="Grade 4">Grade 4</option>
+                            <option value="Grade 5">Grade 5</option><option value="Grade 6">Grade 6</option>
+                            <option value="Grade 7">Grade 7</option><option value="Grade 8">Grade 8</option>
+                            <option value="Grade 9">Grade 9</option><option value="Grade 10">Grade 10</option>
+                            <option value="Grade 11">Grade 11</option><option value="Grade 12">Grade 12</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Payment Mode</label>
+                        <select id="paymentMode" class="mt-1 w-full p-2 border rounded-md">
+                            <option value="Cash">Cash</option><option value="Card">Card</option>
+                            <option value="UPI">UPI</option><option value="Bank Transfer">Bank Transfer</option>
+                            <option value="Cheque">Cheque</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 border rounded-lg overflow-hidden mb-6">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-200 text-gray-700 text-sm">
+                                <th class="p-3 border-b">Fee Category</th>
+                                <th class="p-3 border-b text-right w-1/5">Standard Fee (₹)</th>
+                                <th class="p-3 border-b text-right w-1/5">Prev. Paid (₹)</th>
+                                <th class="p-3 border-b text-right w-1/5">Current Payment (₹)</th>
+                                <th class="p-3 border-b text-right w-1/5">Balance (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="p-3 font-semibold">School Fee</td>
+                                <td class="p-3 text-right"><input type="number" id="std-school" readonly class="w-full text-right bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3 text-right"><input type="number" id="prev-school" readonly class="w-full text-right text-green-700 font-bold bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3"><input type="number" id="pay-school" value="0" oninput="calculateSpecificTotals()" class="w-full p-2 border rounded text-right bg-white focus:ring-blue-500"></td>
+                                <td class="p-3 text-right"><input type="number" id="bal-school" readonly class="w-full text-right font-bold text-red-600 bg-transparent border-none focus:ring-0"></td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-semibold">Books Fee</td>
+                                <td class="p-3 text-right"><input type="number" id="std-books" readonly class="w-full text-right bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3 text-right"><input type="number" id="prev-books" readonly class="w-full text-right text-green-700 font-bold bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3"><input type="number" id="pay-books" value="0" oninput="calculateSpecificTotals()" class="w-full p-2 border rounded text-right bg-white focus:ring-blue-500"></td>
+                                <td class="p-3 text-right"><input type="number" id="bal-books" readonly class="w-full text-right font-bold text-red-600 bg-transparent border-none focus:ring-0"></td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-semibold">Uniform Fee</td>
+                                <td class="p-3 text-right"><input type="number" id="std-uniform" readonly class="w-full text-right bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3 text-right"><input type="number" id="prev-uniform" readonly class="w-full text-right text-green-700 font-bold bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3"><input type="number" id="pay-uniform" value="0" oninput="calculateSpecificTotals()" class="w-full p-2 border rounded text-right bg-white focus:ring-blue-500"></td>
+                                <td class="p-3 text-right"><input type="number" id="bal-uniform" readonly class="w-full text-right font-bold text-red-600 bg-transparent border-none focus:ring-0"></td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="p-3 font-semibold">Transport Fee</td>
+                                <td class="p-3 text-right"><input type="number" id="std-transport" readonly class="w-full text-right bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3 text-right"><input type="number" id="prev-transport" readonly class="w-full text-right text-green-700 font-bold bg-transparent border-none focus:ring-0"></td>
+                                <td class="p-3"><input type="number" id="pay-transport" value="0" oninput="calculateSpecificTotals()" class="w-full p-2 border rounded text-right bg-white focus:ring-blue-500"></td>
+                                <td class="p-3 text-right"><input type="number" id="bal-transport" readonly class="w-full text-right font-bold text-red-600 bg-transparent border-none focus:ring-0"></td>
+                            </tr>
+                            <tr class="bg-red-50 border-t-2 border-gray-300">
+                                <td class="p-3 font-bold text-red-700">Concession (Total Discount)</td>
+                                <td class="p-3" colspan="4"><input type="number" id="concession" value="0" oninput="calculateSpecificTotals()" class="w-full p-2 border border-red-300 rounded text-right bg-white focus:ring-red-500 text-red-700 font-bold"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between items-center bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6 gap-4">
+                    <div class="text-center w-full">
+                        <p class="text-xs text-gray-500 uppercase font-bold">Total Expected (Inc. Discount)</p>
+                        <p class="text-xl font-bold text-gray-800" id="summary-expected">₹0</p>
+                    </div>
+                    <div class="text-center w-full border-l border-blue-200">
+                        <p class="text-xs text-gray-500 uppercase font-bold">Total Currently Paying</p>
+                        <p class="text-2xl font-black text-blue-700" id="summary-paying">₹0</p>
+                    </div>
+                    <div class="text-center w-full border-l border-blue-200">
+                        <p class="text-xs text-gray-500 uppercase font-bold">Overall Balance Due</p>
+                        <p class="text-xl font-bold text-red-600" id="summary-balance">₹0</p>
+                    </div>
+                </div>
+
+                <button onclick="processPaymentAndPrint()" class="bg-blue-600 text-white px-8 py-3 rounded shadow-lg hover:bg-blue-700 transition font-bold w-full md:w-auto">Save All Payments & Print Receipt</button>
+            </div>
+
+            <div id="settings-tab" class="bg-white p-6 rounded-lg shadow-lg hidden">
+                <h2 class="text-2xl font-semibold mb-6 border-b pb-2">Class Fee Configurations</h2>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded text-sm text-blue-800">
+                    Update the standard fees for each class here.
+                </div>
+                <div id="fee-settings-container" class="space-y-4"></div>
+                <button onclick="saveFeeSettings()" class="mt-6 bg-green-600 text-white px-6 py-2 rounded shadow hover:bg-green-700 font-medium transition">Save Standard Fees</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="printable-bill" class="bg-white hidden max-w-3xl mx-auto font-serif text-black">
         
-        <div class="flex flex-col items-center justify-center border-b-2 border-black pb-4 mb-4">
-            <img src="logo.png" alt="School Logo" class="h-20 w-20 object-contain mb-2" onerror="this.style.display='none'">
-            <h1 class="text-3xl font-extrabold leading-tight uppercase tracking-wide text-center">Vivekananda Vidya Mandir</h1>
-            <h2 class="text-xl font-bold mt-1 text-center">By, Arya International</h2>
-            <div class="text-xs font-medium space-y-1 mt-2 text-center">
-                <p>AFFILIATED TO GOVT. OF TAMIL NADU</p>
-                <p>S R Nagar, Jawalagiri Road, Thally 635 118</p>
-                <p>Ph: +91 9442852500, +91 9489734255 | Email: admissions@vvmaryainternational.org</p>
+        <div class="relative border-b-2 border-black pb-4 mb-4">
+            <img src="logo.png" alt="Logo" class="absolute left-0 top-0 h-24 w-24 object-contain" onerror="this.style.display='none'">
+            <div class="text-center w-full px-28">
+                <h1 class="text-3xl font-extrabold leading-tight uppercase tracking-wide">Vivekananda Vidya Mandir</h1>
+                <h2 class="text-xl font-bold mt-1">By, Arya International</h2>
+                <div class="text-sm space-y-1 mt-2">
+                    <p class="font-semibold">AFFILIATED TO GOVT. OF TAMIL NADU</p>
+                    <p>S R Nagar, Jawalagiri Road, Thally 635 118</p>
+                    <p>Ph: +91 9442852500, +91 9489734255</p>
+                    <p>Email: admissions@vvmaryainternational.org</p>
+                </div>
             </div>
         </div>
 
-        <div class="bg-black text-white text-center text-lg font-bold py-1 mb-4 uppercase tracking-wider print-bg">
-            Fee Receipt / Statement
+        <div class="text-center text-xl font-bold mb-4 uppercase tracking-wider border-b border-black pb-2 inline-block w-full">
+            Fee Receipt & Statement
         </div>
 
-        <div class="flex justify-between mb-4 text-sm">
+        <div class="flex justify-between mb-6 text-sm">
             <div>
                 <p class="mb-1"><span class="font-bold">Student Name:</span> <span class="uppercase" id="printStudentName"></span></p>
                 <p class="mb-1"><span class="font-bold">ID/Roll No:</span> <span id="printStudentId"></span></p>
@@ -224,56 +276,83 @@
             </div>
         </div>
 
-        <table class="w-full mb-4 border-collapse border border-black text-sm">
+        <table class="w-full mb-6 border-collapse border border-black text-sm">
             <thead>
-                <tr class="bg-black text-white font-bold uppercase tracking-wide print-bg">
-                    <th class="p-2 text-left border border-black">Description</th>
-                    <th class="p-2 text-right border border-black">Amount (₹)</th>
+                <tr class="font-bold uppercase border-b-2 border-black">
+                    <th class="p-2 text-left border-r border-black">Fee Description</th>
+                    <th class="p-2 text-right border-r border-black">Standard (₹)</th>
+                    <th class="p-2 text-right border-r border-black">Total Paid (₹)</th>
+                    <th class="p-2 text-right">Balance Due (₹)</th>
                 </tr>
             </thead>
-            <tbody id="printFeeBreakdown" class="font-medium">
+            <tbody id="printFeeBreakdown">
                 </tbody>
         </table>
 
         <div class="flex justify-end">
-            <div class="w-full sm:w-2/3 md:w-1/2 text-sm">
-                <div class="flex justify-between border-b border-black py-1">
-                    <span class="font-bold">Total Standard Fee:</span>
+            <div class="w-full sm:w-2/3 md:w-1/2 text-sm border border-black p-3">
+                <div class="flex justify-between py-1">
+                    <span class="font-bold">Gross Standard Fee:</span>
                     <span id="printStandardFee"></span>
                 </div>
-                <div class="flex justify-between border-b border-black py-1">
+                <div class="flex justify-between py-1 border-b border-gray-400">
                     <span class="font-bold">Concession Applied:</span>
                     <span id="printConcession"></span>
                 </div>
-                <div class="flex justify-between border-b border-black py-1">
-                    <span class="font-bold">Total Paid (Including Today):</span>
-                    <span id="printTotalPaid"></span>
+                <div class="flex justify-between py-1 mt-1 font-bold text-base">
+                    <span>Net Expected Fee:</span>
+                    <span id="printNetFee"></span>
                 </div>
-                <div class="flex justify-between py-2 text-lg font-extrabold border-t-2 border-black mt-1">
-                    <span>Balance Due:</span>
+                <div class="flex justify-between py-1">
+                    <span class="font-bold">Previously Paid:</span>
+                    <span id="printPrevPaid"></span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-black">
+                    <span class="font-bold uppercase">Payment Received Today:</span>
+                    <span id="printCurrentPay" class="font-bold"></span>
+                </div>
+                <div class="flex justify-between py-2 text-lg font-extrabold mt-1">
+                    <span>Overall Balance Due:</span>
                     <span id="printBalance"></span>
                 </div>
             </div>
         </div>
         
-        <div class="mt-16 flex justify-between text-black text-sm">
-            <div class="border-t border-black pt-1 w-40 text-center font-bold">Parent/Guardian</div>
-            <div class="border-t border-black pt-1 w-40 text-center font-bold">Authorized Signatory</div>
-        </div>
-        
-        <div class="mt-4 text-center text-xs italic border-t border-black pt-2">
-            Computer generated receipt. Valid subject to realization of cheque/draft.
+        <div class="mt-24 flex justify-between text-black text-sm">
+            <div class="border-t border-black pt-1 w-48 text-center font-bold">Parent/Guardian Signature</div>
+            <div class="border-t border-black pt-1 w-48 text-center font-bold">Authorized Signatory</div>
         </div>
     </div>
 
     <script>
-        // Register Service Worker for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-            .catch(err => console.error('Service Worker Registration Failed:', err));
+        // --- 1. AUTHENTICATION ---
+        function handleLogin() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            if (u === 'admin' && p === 'vvm@123') {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                renderDashboard();
+            } else {
+                alert("Invalid Username or Password.");
+            }
         }
 
-        // 1. Initial Data Setup
+        function handleLogout() {
+            sessionStorage.removeItem('isLoggedIn');
+            window.location.reload();
+        }
+
+        window.onload = () => {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                renderDashboard();
+            }
+        };
+
+        // --- 2. DATA SETUP & MIGRATION ---
         const defaultFees = {
             "Pre-KG": { school: 20000, books: 2000, uniform: 1500, transport: 4000 },
             "LKG": { school: 22000, books: 2500, uniform: 1800, transport: 4500 },
@@ -295,309 +374,323 @@
         let classFees = JSON.parse(localStorage.getItem('classFees')) || defaultFees;
         let studentsData = JSON.parse(localStorage.getItem('studentsData')) || {};
 
-        // Format currency helper function
-        const formatCurrency = (amount) => {
-            return `₹${parseFloat(amount).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
-        };
+        // Data Migration Script (Ensures updates don't break old single-total records)
+        for (let id in studentsData) {
+            let s = studentsData[id];
+            if (typeof s.totalPaid === 'number' && !s.paidBreakdown) {
+                // Convert old format to new specific breakdown format
+                s.paidBreakdown = {
+                    school: s.totalPaid, // Dump old generic total into school fee
+                    books: 0, uniform: 0, transport: 0
+                };
+                delete s.totalPaid;
+            } else if (!s.paidBreakdown) {
+                s.paidBreakdown = { school: 0, books: 0, uniform: 0, transport: 0 };
+            }
+        }
+        localStorage.setItem('studentsData', JSON.stringify(studentsData));
 
-        // Run dashboard render on load
-        window.onload = () => {
-            renderDashboard();
-        };
+        const formatCurrency = (amount) => `₹${parseFloat(amount || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
-        // 2. UI Navigation
+        // --- 3. UI NAVIGATION ---
         function switchTab(tab) {
             document.getElementById('dashboard-tab').classList.add('hidden');
             document.getElementById('billing-tab').classList.add('hidden');
             document.getElementById('settings-tab').classList.add('hidden');
             document.getElementById(`${tab}-tab`).classList.remove('hidden');
-            
             if (tab === 'settings') renderSettings();
             if (tab === 'dashboard') renderDashboard();
         }
 
-        // 3. Dashboard Logic
+        // --- 4. DASHBOARD LOGIC ---
         function renderDashboard() {
-            let totalExpected = 0;
-            let totalConcession = 0;
-            let totalPaid = 0;
-            let totalBalance = 0;
-
+            let totals = { exp: 0, conc: 0, paid: 0, bal: 0 };
             let classStats = {};
-            
-            for (let grade in classFees) {
-                classStats[grade] = { count: 0, expected: 0, concession: 0, paid: 0, balance: 0 };
-            }
+            for (let grade in classFees) classStats[grade] = { count: 0, exp: 0, conc: 0, paid: 0, bal: 0 };
 
             let studentRowsHTML = '';
 
             for (let id in studentsData) {
                 let student = studentsData[id];
                 let cls = student.class;
+                if (!classStats[cls]) classStats[cls] = { count: 0, exp: 0, conc: 0, paid: 0, bal: 0 };
+
+                let fees = classFees[cls] || { school: 0, books: 0, uniform: 0, transport: 0 };
+                let stdFee = fees.school + fees.books + fees.uniform + fees.transport;
                 
-                if (!classStats[cls]) {
-                    classStats[cls] = { count: 0, expected: 0, concession: 0, paid: 0, balance: 0 };
-                }
+                let conc = student.concession || 0;
+                let bd = student.paidBreakdown;
+                let paid = bd.school + bd.books + bd.uniform + bd.transport;
+                let bal = (stdFee - conc) - paid;
 
-                let standardFee = 0;
-                if(classFees[cls]) {
-                    let fees = classFees[cls];
-                    standardFee = fees.school + fees.books + fees.uniform + fees.transport;
-                }
-
-                let concession = student.concession || 0;
-                let paid = student.totalPaid || 0;
-                let balance = (standardFee - concession) - paid;
-
-                classStats[cls].count += 1;
-                classStats[cls].expected += standardFee;
-                classStats[cls].concession += concession;
+                classStats[cls].count++;
+                classStats[cls].exp += stdFee;
+                classStats[cls].conc += conc;
                 classStats[cls].paid += paid;
-                classStats[cls].balance += balance;
+                classStats[cls].bal += bal;
 
-                totalExpected += standardFee;
-                totalConcession += concession;
-                totalPaid += paid;
-                totalBalance += balance;
+                totals.exp += stdFee; totals.conc += conc; totals.paid += paid; totals.bal += bal;
 
                 studentRowsHTML += `
-                    <tr class="border-b hover:bg-gray-50 transition text-sm sm:text-base">
-                        <td class="p-3 font-semibold text-gray-800">${id}</td>
-                        <td class="p-3 font-bold text-blue-800 uppercase">${student.name}</td>
-                        <td class="p-3 font-medium">${cls}</td>
-                        <td class="p-3 text-right">${formatCurrency(standardFee)}</td>
-                        <td class="p-3 text-right text-red-600">- ${formatCurrency(concession)}</td>
-                        <td class="p-3 text-right text-green-700 font-bold">${formatCurrency(paid)}</td>
-                        <td class="p-3 text-right font-extrabold text-gray-900">${formatCurrency(balance)}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="printStudentDetails('${id}')" class="bg-gray-800 text-white text-xs px-3 py-1 rounded hover:bg-black transition shadow-sm">Print</button>
-                        </td>
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-2 font-semibold text-gray-800">${id}</td>
+                        <td class="p-2 font-bold text-blue-800 uppercase">${student.name}</td>
+                        <td class="p-2">${cls}</td>
+                        <td class="p-2 text-right">${formatCurrency(stdFee)}</td>
+                        <td class="p-2 text-right text-red-600">-${formatCurrency(conc)}</td>
+                        <td class="p-2 text-right text-green-700 font-bold">${formatCurrency(paid)}</td>
+                        <td class="p-2 text-right font-extrabold text-gray-900">${formatCurrency(bal)}</td>
+                        <td class="p-2 text-center"><button onclick="printStudentDetails('${id}')" class="bg-gray-800 text-white text-xs px-3 py-1 rounded hover:bg-black">Print</button></td>
                     </tr>
                 `;
             }
 
-            document.getElementById('dashTotalExpected').innerText = formatCurrency(totalExpected);
-            document.getElementById('dashTotalConcession').innerText = formatCurrency(totalConcession);
-            document.getElementById('dashTotalPaid').innerText = formatCurrency(totalPaid);
-            document.getElementById('dashTotalBalance').innerText = formatCurrency(totalBalance);
+            document.getElementById('dashTotalExpected').innerText = formatCurrency(totals.exp);
+            document.getElementById('dashTotalConcession').innerText = formatCurrency(totals.conc);
+            document.getElementById('dashTotalPaid').innerText = formatCurrency(totals.paid);
+            document.getElementById('dashTotalBalance').innerText = formatCurrency(totals.bal);
 
             let classRowsHTML = '';
             for (let grade in classStats) {
-                let stats = classStats[grade];
-                if (stats.count > 0) {
+                if (classStats[grade].count > 0) {
+                    let s = classStats[grade];
                     classRowsHTML += `
-                        <tr class="border-b hover:bg-gray-50 text-sm sm:text-base">
-                            <td class="p-3 font-bold text-gray-800">${grade}</td>
-                            <td class="p-3 text-center bg-blue-50 font-extrabold">${stats.count}</td>
-                            <td class="p-3 text-right">${formatCurrency(stats.expected)}</td>
-                            <td class="p-3 text-right text-red-600">- ${formatCurrency(stats.concession)}</td>
-                            <td class="p-3 text-right text-green-700 font-bold">${formatCurrency(stats.paid)}</td>
-                            <td class="p-3 text-right font-extrabold text-gray-900">${formatCurrency(stats.balance)}</td>
+                        <tr class="border-b hover:bg-gray-50 text-sm">
+                            <td class="p-3 font-bold">${grade}</td>
+                            <td class="p-3 text-center bg-blue-50 font-bold">${s.count}</td>
+                            <td class="p-3 text-right">${formatCurrency(s.exp)}</td>
+                            <td class="p-3 text-right text-red-600">-${formatCurrency(s.conc)}</td>
+                            <td class="p-3 text-right text-green-700 font-bold">${formatCurrency(s.paid)}</td>
+                            <td class="p-3 text-right font-bold text-gray-900">${formatCurrency(s.bal)}</td>
                         </tr>
                     `;
                 }
             }
-
-            if (classRowsHTML === '') classRowsHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-500 italic">No student records found. Process a payment to see data here.</td></tr>';
-            if (studentRowsHTML === '') studentRowsHTML = '<tr><td colspan="8" class="p-6 text-center text-gray-500 italic">No student records found.</td></tr>';
+            if (!classRowsHTML) classRowsHTML = '<tr><td colspan="6" class="p-4 text-center">No records.</td></tr>';
+            if (!studentRowsHTML) studentRowsHTML = '<tr><td colspan="8" class="p-4 text-center">No records.</td></tr>';
 
             document.getElementById('classReportBody').innerHTML = classRowsHTML;
             document.getElementById('studentReportBody').innerHTML = studentRowsHTML;
         }
 
-        // 4. Settings Management
+        // --- 5. SETTINGS ---
         function renderSettings() {
             const container = document.getElementById('fee-settings-container');
             container.innerHTML = '';
             for (let grade in classFees) {
-                let html = `
-                <div class="p-4 border border-gray-200 rounded-lg shadow-sm bg-white flex flex-col md:flex-row gap-4 items-end hover:border-blue-300 transition">
-                    <div class="w-full md:w-24"><label class="text-sm font-extrabold text-blue-900">${grade}</label></div>
-                    <div class="flex-1 w-full"><label class="text-xs font-semibold text-gray-500">School Fee</label><input type="number" id="sf-${grade}" value="${classFees[grade].school}" class="w-full p-2 border rounded bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></div>
-                    <div class="flex-1 w-full"><label class="text-xs font-semibold text-gray-500">Books</label><input type="number" id="bf-${grade}" value="${classFees[grade].books}" class="w-full p-2 border rounded bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></div>
-                    <div class="flex-1 w-full"><label class="text-xs font-semibold text-gray-500">Uniform</label><input type="number" id="uf-${grade}" value="${classFees[grade].uniform}" class="w-full p-2 border rounded bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></div>
-                    <div class="flex-1 w-full"><label class="text-xs font-semibold text-gray-500">Transport</label><input type="number" id="tf-${grade}" value="${classFees[grade].transport}" class="w-full p-2 border rounded bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"></div>
+                let f = classFees[grade];
+                container.innerHTML += `
+                <div class="p-4 border rounded shadow-sm bg-white flex flex-wrap gap-4 items-end">
+                    <div class="w-24"><label class="text-sm font-bold text-blue-900">${grade}</label></div>
+                    <div class="flex-1"><label class="text-xs">School</label><input type="number" id="sf-${grade}" value="${f.school}" class="w-full p-2 border rounded"></div>
+                    <div class="flex-1"><label class="text-xs">Books</label><input type="number" id="bf-${grade}" value="${f.books}" class="w-full p-2 border rounded"></div>
+                    <div class="flex-1"><label class="text-xs">Uniform</label><input type="number" id="uf-${grade}" value="${f.uniform}" class="w-full p-2 border rounded"></div>
+                    <div class="flex-1"><label class="text-xs">Transport</label><input type="number" id="tf-${grade}" value="${f.transport}" class="w-full p-2 border rounded"></div>
                 </div>`;
-                container.innerHTML += html;
             }
         }
 
         function saveFeeSettings() {
             for (let grade in classFees) {
-                classFees[grade].school = parseFloat(document.getElementById(`sf-${grade}`).value) || 0;
-                classFees[grade].books = parseFloat(document.getElementById(`bf-${grade}`).value) || 0;
-                classFees[grade].uniform = parseFloat(document.getElementById(`uf-${grade}`).value) || 0;
-                classFees[grade].transport = parseFloat(document.getElementById(`tf-${grade}`).value) || 0;
+                classFees[grade] = {
+                    school: parseFloat(document.getElementById(`sf-${grade}`).value) || 0,
+                    books: parseFloat(document.getElementById(`bf-${grade}`).value) || 0,
+                    uniform: parseFloat(document.getElementById(`uf-${grade}`).value) || 0,
+                    transport: parseFloat(document.getElementById(`tf-${grade}`).value) || 0
+                };
             }
             localStorage.setItem('classFees', JSON.stringify(classFees));
-            alert('Success! Fee structures have been updated.');
-            switchTab('dashboard'); 
+            alert('Settings Saved.'); switchTab('dashboard');
         }
 
-        // 5. Billing Logic
+        // --- 6. SPECIFIC BILLING LOGIC ---
         function loadStudent() {
             const id = document.getElementById('studentId').value.trim().toUpperCase();
             document.getElementById('studentId').value = id; 
             
+            // Reset current payments
+            ['school', 'books', 'uniform', 'transport'].forEach(cat => document.getElementById(`pay-${cat}`).value = 0);
+
             if (id && studentsData[id]) {
-                const student = studentsData[id];
-                document.getElementById('studentName').value = student.name;
-                document.getElementById('studentClass').value = student.class;
-                document.getElementById('concession').value = student.concession;
-                document.getElementById('prevPaid').value = student.totalPaid;
+                const s = studentsData[id];
+                document.getElementById('studentName').value = s.name;
+                document.getElementById('studentClass').value = s.class;
+                document.getElementById('concession').value = s.concession || 0;
+                
+                ['school', 'books', 'uniform', 'transport'].forEach(cat => {
+                    document.getElementById(`prev-${cat}`).value = s.paidBreakdown[cat] || 0;
+                });
                 loadClassFees();
             } else {
-                document.getElementById('prevPaid').value = 0;
+                ['school', 'books', 'uniform', 'transport'].forEach(cat => document.getElementById(`prev-${cat}`).value = 0);
+                document.getElementById('concession').value = 0;
             }
         }
 
         function loadClassFees() {
             const cls = document.getElementById('studentClass').value;
             if (!cls || !classFees[cls]) return;
-            
             const fees = classFees[cls];
-            const total = fees.school + fees.books + fees.uniform + fees.transport;
-            document.getElementById('standardFee').value = total;
-            calculateTotals();
+            
+            ['school', 'books', 'uniform', 'transport'].forEach(cat => {
+                document.getElementById(`std-${cat}`).value = fees[cat];
+            });
+            calculateSpecificTotals();
         }
 
-        function calculateTotals() {
-            const stdFee = parseFloat(document.getElementById('standardFee').value) || 0;
+        function calculateSpecificTotals() {
+            let totalExpected = 0; let totalPaying = 0; let overallBalance = 0;
             const concession = parseFloat(document.getElementById('concession').value) || 0;
-            const prevPaid = parseFloat(document.getElementById('prevPaid').value) || 0;
-            const currentPay = parseFloat(document.getElementById('currentPayment').value) || 0;
 
-            const net = stdFee - concession;
-            const balance = net - (prevPaid + currentPay);
+            ['school', 'books', 'uniform', 'transport'].forEach(cat => {
+                let std = parseFloat(document.getElementById(`std-${cat}`).value) || 0;
+                let prev = parseFloat(document.getElementById(`prev-${cat}`).value) || 0;
+                let pay = parseFloat(document.getElementById(`pay-${cat}`).value) || 0;
+                
+                let bal = std - (prev + pay);
+                document.getElementById(`bal-${cat}`).value = bal;
+                
+                totalExpected += std;
+                totalPaying += pay;
+                overallBalance += bal;
+            });
 
-            document.getElementById('netFee').value = net;
-            document.getElementById('balance').value = balance;
+            // Apply global concession to the overall balance and expected
+            let netExpected = totalExpected - concession;
+            let netBalance = overallBalance - concession;
+
+            document.getElementById('summary-expected').innerText = formatCurrency(netExpected);
+            document.getElementById('summary-paying').innerText = formatCurrency(totalPaying);
+            document.getElementById('summary-balance').innerText = formatCurrency(netBalance);
         }
 
+        // --- 7. PRINTING ---
         function generateReceiptNo() {
-            const date = new Date();
-            const year = date.getFullYear().toString().slice(-2);
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const random = Math.floor(1000 + Math.random() * 9000);
-            return `VVM-${year}${month}-${random}`;
+            const d = new Date();
+            return `VVM-${d.getFullYear().toString().slice(-2)}${(d.getMonth()+1).toString().padStart(2,'0')}-${Math.floor(1000+Math.random()*9000)}`;
         }
 
-        // Feature: Print specific student from Dashboard Ledger
-        function printStudentDetails(studentId) {
-            const student = studentsData[studentId];
-            if (!student) return;
-
-            const cls = student.class;
-            let standardFee = 0;
-            let fees = classFees[cls];
-            if(fees) {
-                standardFee = fees.school + fees.books + fees.uniform + fees.transport;
-            }
-
-            const concession = student.concession || 0;
-            const totalPaid = student.totalPaid || 0;
-            const balance = (standardFee - concession) - totalPaid;
-
+        // Print Specific from Dashboard
+        function printStudentDetails(id) {
+            const s = studentsData[id];
+            if (!s) return;
+            const fees = classFees[s.class] || {school:0, books:0, uniform:0, transport:0};
+            
+            document.getElementById('printStudentName').innerText = s.name;
+            document.getElementById('printStudentId').innerText = id;
+            document.getElementById('printStudentClass').innerText = s.class;
             document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-IN');
-            document.getElementById('printReceiptNo').innerText = generateReceiptNo();
-            document.getElementById('printStudentName').innerText = student.name;
-            document.getElementById('printStudentId').innerText = studentId;
-            document.getElementById('printStudentClass').innerText = cls;
-            document.getElementById('printMode').innerText = 'N/A (Statement Only)';
+            document.getElementById('printMode').innerText = 'Statement';
+            document.getElementById('printReceiptNo').innerText = 'N/A';
 
-            const breakdown = `
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">School Fee</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees?.school || 0)}</td></tr>
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">Books Fee</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees?.books || 0)}</td></tr>
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">Uniform Fee</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees?.uniform || 0)}</td></tr>
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">Transportation Fee</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees?.transport || 0)}</td></tr>
-            `;
-            document.getElementById('printFeeBreakdown').innerHTML = breakdown;
+            let breakdownHTML = '';
+            let totalStd = 0; let totalPaid = 0;
 
-            document.getElementById('printStandardFee').innerText = formatCurrency(standardFee);
-            document.getElementById('printConcession').innerText = `- ${formatCurrency(concession)}`;
-            document.getElementById('printTotalPaid').innerText = formatCurrency(totalPaid);
-            document.getElementById('printBalance').innerText = formatCurrency(balance);
+            ['school', 'books', 'uniform', 'transport'].forEach(cat => {
+                let label = cat.charAt(0).toUpperCase() + cat.slice(1) + ' Fee';
+                let std = fees[cat] || 0;
+                let paid = s.paidBreakdown[cat] || 0;
+                let bal = std - paid;
+                
+                totalStd += std; totalPaid += paid;
+                
+                breakdownHTML += `
+                    <tr class="border-b border-gray-300">
+                        <td class="p-2 border-r border-black">${label}</td>
+                        <td class="p-2 border-r border-black text-right">${formatCurrency(std)}</td>
+                        <td class="p-2 border-r border-black text-right">${formatCurrency(paid)}</td>
+                        <td class="p-2 text-right">${formatCurrency(bal)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('printFeeBreakdown').innerHTML = breakdownHTML;
+            
+            let conc = s.concession || 0;
+            document.getElementById('printStandardFee').innerText = formatCurrency(totalStd);
+            document.getElementById('printConcession').innerText = `- ${formatCurrency(conc)}`;
+            document.getElementById('printNetFee').innerText = formatCurrency(totalStd - conc);
+            document.getElementById('printPrevPaid').innerText = formatCurrency(totalPaid);
+            document.getElementById('printCurrentPay').innerText = '₹0.00';
+            document.getElementById('printBalance').innerText = formatCurrency((totalStd - conc) - totalPaid);
 
             document.getElementById('printable-bill').classList.remove('hidden');
-            
-            setTimeout(() => {
-                window.print();
-                setTimeout(() => {
-                    document.getElementById('printable-bill').classList.add('hidden');
-                }, 500);
-            }, 100);
+            setTimeout(() => { window.print(); document.getElementById('printable-bill').classList.add('hidden'); }, 100);
         }
 
-        // 6. Processing and Printing new payments
+        // Process New Payment & Print
         function processPaymentAndPrint() {
             const id = document.getElementById('studentId').value.trim().toUpperCase();
-            if (!id) {
-                alert("Error: Please enter a Student ID / Roll No.");
-                document.getElementById('studentId').focus();
-                return;
-            }
-
             const name = document.getElementById('studentName').value.trim();
-            if(!name) {
-                alert("Error: Please enter the Student's Name.");
-                document.getElementById('studentName').focus();
-                return;
-            }
-
             const cls = document.getElementById('studentClass').value;
-            if (!cls) {
-                alert("Error: Please select a class.");
-                document.getElementById('studentClass').focus();
-                return;
-            }
+            
+            if (!id || !name || !cls) return alert("Please fill ID, Name, and Class.");
 
-            const currentPay = parseFloat(document.getElementById('currentPayment').value) || 0;
-            if (currentPay <= 0) {
-                const confirmZero = confirm("Current payment amount is 0. Do you still want to generate a balance receipt?");
-                if(!confirmZero) return;
-            }
+            let bd = { school: 0, books: 0, uniform: 0, transport: 0 };
+            let totalCurrentPay = 0;
+
+            ['school', 'books', 'uniform', 'transport'].forEach(cat => {
+                let prev = parseFloat(document.getElementById(`prev-${cat}`).value) || 0;
+                let curr = parseFloat(document.getElementById(`pay-${cat}`).value) || 0;
+                bd[cat] = prev + curr;
+                totalCurrentPay += curr;
+            });
 
             const concession = parseFloat(document.getElementById('concession').value) || 0;
-            const prevPaid = parseFloat(document.getElementById('prevPaid').value) || 0;
-            
-            const newTotalPaid = prevPaid + currentPay;
 
-            studentsData[id] = { name, class: cls, concession, totalPaid: newTotalPaid };
+            // Save
+            studentsData[id] = { name, class: cls, concession, paidBreakdown: bd };
             localStorage.setItem('studentsData', JSON.stringify(studentsData));
 
-            document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-IN');
-            document.getElementById('printReceiptNo').innerText = generateReceiptNo();
+            // Populate Print
             document.getElementById('printStudentName').innerText = name;
             document.getElementById('printStudentId').innerText = id;
             document.getElementById('printStudentClass').innerText = cls;
+            document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-IN');
             document.getElementById('printMode').innerText = document.getElementById('paymentMode').value;
+            document.getElementById('printReceiptNo').innerText = generateReceiptNo();
 
-            const fees = classFees[cls];
-            const breakdown = `
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">School Fee (Full/Term Plan)</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees.school)}</td></tr>
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">Books Fee</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees.books)}</td></tr>
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">Uniform Fee</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees.uniform)}</td></tr>
-                <tr class="border-b border-black"><td class="p-2 border-x border-black">Transportation Fee</td><td class="p-2 border-r border-black text-right">${formatCurrency(fees.transport)}</td></tr>
-                <tr class="bg-gray-200 font-bold print-bg"><td class="p-2 border-x border-b border-black text-right">CURRENT PAYMENT RECORDED:</td><td class="p-2 border-r border-b border-black text-right">${formatCurrency(currentPay)}</td></tr>
-            `;
-            document.getElementById('printFeeBreakdown').innerHTML = breakdown;
+            let breakdownHTML = '';
+            let totalStd = 0; let totalPrev = 0;
 
-            document.getElementById('printStandardFee').innerText = formatCurrency(document.getElementById('standardFee').value);
+            ['school', 'books', 'uniform', 'transport'].forEach(cat => {
+                let label = cat.charAt(0).toUpperCase() + cat.slice(1) + ' Fee';
+                let std = parseFloat(document.getElementById(`std-${cat}`).value) || 0;
+                let prev = parseFloat(document.getElementById(`prev-${cat}`).value) || 0;
+                let curr = parseFloat(document.getElementById(`pay-${cat}`).value) || 0;
+                
+                let newTotalPaid = prev + curr;
+                let bal = std - newTotalPaid;
+                
+                totalStd += std; totalPrev += prev;
+                
+                breakdownHTML += `
+                    <tr class="border-b border-gray-300">
+                        <td class="p-2 border-r border-black">${label} <span class="text-xs italic text-gray-600">(Paying Now: ${formatCurrency(curr)})</span></td>
+                        <td class="p-2 border-r border-black text-right">${formatCurrency(std)}</td>
+                        <td class="p-2 border-r border-black text-right font-bold">${formatCurrency(newTotalPaid)}</td>
+                        <td class="p-2 text-right">${formatCurrency(bal)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('printFeeBreakdown').innerHTML = breakdownHTML;
+            
+            document.getElementById('printStandardFee').innerText = formatCurrency(totalStd);
             document.getElementById('printConcession').innerText = `- ${formatCurrency(concession)}`;
-            document.getElementById('printTotalPaid').innerText = formatCurrency(newTotalPaid);
-            document.getElementById('printBalance').innerText = formatCurrency(document.getElementById('balance').value);
+            document.getElementById('printNetFee').innerText = formatCurrency(totalStd - concession);
+            document.getElementById('printPrevPaid').innerText = formatCurrency(totalPrev);
+            document.getElementById('printCurrentPay').innerText = formatCurrency(totalCurrentPay);
+            
+            let finalBal = (totalStd - concession) - (totalPrev + totalCurrentPay);
+            document.getElementById('printBalance').innerText = formatCurrency(finalBal);
 
             document.getElementById('printable-bill').classList.remove('hidden');
-            
-            setTimeout(() => {
-                window.print();
-                
+            setTimeout(() => { 
+                window.print(); 
                 setTimeout(() => {
                     document.getElementById('printable-bill').classList.add('hidden');
-                    document.getElementById('prevPaid').value = newTotalPaid;
-                    document.getElementById('currentPayment').value = 0;
-                    calculateTotals();
-                    
+                    loadStudent(); // Reload to reset current pays to 0 and update prevs
                     renderDashboard();
                 }, 500);
             }, 100);
