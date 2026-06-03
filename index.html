@@ -36,7 +36,7 @@
     <div id="login-screen" class="min-h-screen flex items-center justify-center bg-blue-900">
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
             <div class="text-center mb-8">
-                <img src="logo.png" alt="Logo" class="h-20 mx-auto mb-4" onerror="this.style.display='none'">
+                <img src="logo.png" alt="Logo" class="h-24 mx-auto mb-4" onerror="this.style.display='none'">
                 <h1 class="text-2xl font-bold text-blue-900">Vivekananda Vidya Mandir</h1>
                 <p class="text-gray-500 text-sm mt-1">Billing System Login</p>
             </div>
@@ -55,19 +55,21 @@
     </div>
 
     <div id="main-app" class="hidden">
-        <nav class="bg-blue-900 text-white p-4 shadow-md no-print flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <img src="logo.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-0.5" onerror="this.style.display='none'">
-                <div>
-                    <h1 class="text-xl font-bold leading-tight">Vivekananda Vidya Mandir</h1>
-                    <h2 class="text-xs text-blue-200">By, Arya International</h2>
+        
+        <nav class="bg-blue-900 text-white p-4 shadow-md no-print flex flex-col lg:flex-row justify-between items-center gap-6">
+            <div class="flex items-center justify-center gap-4 w-full lg:w-auto">
+                <img src="logo.png" alt="Logo" class="h-16 w-16 bg-white rounded-full p-1 shadow-sm" onerror="this.style.display='none'">
+                <div class="text-center lg:text-left">
+                    <h1 class="text-2xl md:text-3xl font-extrabold leading-tight tracking-wide">Vivekananda Vidya Mandir</h1>
+                    <h2 class="text-sm md:text-lg text-blue-200 font-bold mt-1 text-center lg:text-left">By, Arya International</h2>
                 </div>
             </div>
-            <div class="space-x-4 flex items-center">
+            
+            <div class="flex items-center justify-center flex-wrap gap-4 w-full lg:w-auto text-sm md:text-base">
                 <button onclick="switchTab('dashboard')" class="hover:text-yellow-400 font-medium transition-colors">Dashboard</button>
-                <button onclick="switchTab('billing')" class="hover:text-yellow-400 font-medium border-l border-blue-700 pl-4 transition-colors">Billing</button>
-                <button onclick="switchTab('settings')" class="hover:text-yellow-400 font-medium border-l border-blue-700 pl-4 transition-colors">Fee Settings</button>
-                <button onclick="handleLogout()" class="hover:text-red-400 font-medium border-l border-blue-700 pl-4 transition-colors text-sm">Logout</button>
+                <button onclick="switchTab('billing')" class="hover:text-yellow-400 font-medium lg:border-l lg:border-blue-700 lg:pl-4 transition-colors">Billing</button>
+                <button onclick="switchTab('settings')" class="hover:text-yellow-400 font-medium lg:border-l lg:border-blue-700 lg:pl-4 transition-colors">Fee Settings</button>
+                <button onclick="handleLogout()" class="hover:text-red-400 font-medium lg:border-l lg:border-blue-700 lg:pl-4 transition-colors">Logout</button>
             </div>
         </nav>
 
@@ -247,18 +249,19 @@
 
     <div id="printable-bill" class="bg-white hidden max-w-3xl mx-auto text-[12px]">
         
-        <div class="flex flex-col items-center justify-center border-b-2 border-black pb-2 mb-2 text-center text-black">
-            <div class="flex items-center justify-center gap-4 mb-1">
-                <img src="logo.png" alt="Logo" class="h-14 w-14 object-contain" onerror="this.style.display='none'">
-                <div class="text-left">
-                    <h1 class="text-xl font-extrabold leading-tight uppercase tracking-wide m-0">VIVEKANANDA VIDYA MANDIR</h1>
-                    <h2 class="text-base font-bold mt-0.5 m-0">By, Arya International</h2>
-                </div>
+        <div class="relative border-b-2 border-black pb-2 mb-2">
+            <div class="absolute left-0 top-0 h-full flex items-center">
+                <img src="logo.png" alt="Logo" class="h-16 w-16 object-contain" onerror="this.style.display='none'">
             </div>
-            <div class="text-[10px] space-y-0.5 font-medium w-full">
-                <p>AFFILIATED TO GOVT. OF TAMIL NADU</p>
-                <p>S R Nagar, Jawalagiri Road, Thally 635 118</p>
-                <p>Ph: +91 9442852500, +91 9489734255 | Email: admissions@vvmaryainternational.org</p>
+            
+            <div class="text-center w-full text-black">
+                <h1 class="text-xl font-extrabold leading-tight uppercase tracking-wide m-0">VIVEKANANDA VIDYA MANDIR</h1>
+                <h2 class="text-base font-bold mt-0.5 m-0 text-center">By, Arya International</h2>
+                <div class="text-[10px] space-y-0.5 mt-1 font-medium text-center">
+                    <p>AFFILIATED TO GOVT. OF TAMIL NADU</p>
+                    <p>S R Nagar, Jawalagiri Road, Thally 635 118</p>
+                    <p>Ph: +91 9442852500, +91 9489734255 | Email: admissions@vvmaryainternational.org</p>
+                </div>
             </div>
         </div>
 
